@@ -4,6 +4,9 @@ import subprocess
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from youtube_transcript_api import YouTubeTranscriptApi
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse
+import os
 
 app = FastAPI()
 
@@ -38,3 +41,16 @@ async def run_subprocess_view(request: Request):
         return {"message": "Script executed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error executing script: {e}")
+
+
+app = FastAPI()
+
+
+@app.get("/get-file/{file_name}")
+async def get_file(file_name: str):
+    file_path = f"./{file_name}"  # Relative path to the file in the root directory
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(file_path, filename=file_name)

@@ -2,7 +2,7 @@ import moviepy.editor as mpe
 
 # Create VideoFileClip objects for the video and audio files
 video = mpe.VideoFileClip("output_video.avi")
-audio = mpe.AudioFileClip("test1.mp3")
+audio = mpe.AudioFileClip("output.mp3")
 
 # Merge the video and audio clips
 final_clip = video.set_audio(audio)

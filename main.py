@@ -21,7 +21,16 @@ async def get_subtitles(video_id: str):
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         subtitles = [entry["text"] for entry in transcript]
+        current_directory = os.path.dirname(__file__)
+        paragraph = " ".join(subtitles)
+        script_path = os.path.join(current_directory, "process", "audio.py")
+
+        subprocess.run(
+            ["python", script_path, paragraph],
+            check=True,
+        )
         return JSONResponse(content={"subtitles": subtitles})
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

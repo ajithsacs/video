@@ -11,6 +11,11 @@ import os
 app = FastAPI()
 
 
+@app.get("/")
+async def demo(video_id: str):
+    return "data"
+
+
 @app.get("/api/subtitles/{video_id}")
 async def get_subtitles(video_id: str):
     try:
@@ -41,9 +46,6 @@ async def run_subprocess_view(request: Request):
         return {"message": "Script executed successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error executing script: {e}")
-
-
-app = FastAPI()
 
 
 @app.get("/get-file/{file_name}")

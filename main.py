@@ -7,6 +7,9 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 import os
+from pydantic import BaseModel
+from pyttsx3 import init
+from starlette.responses import FileResponse
 
 app = FastAPI()
 
@@ -21,15 +24,10 @@ async def get_subtitles(video_id: str):
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         subtitles = [entry["text"] for entry in transcript]
-        current_directory = os.path.dirname(__file__)
         paragraph = " ".join(subtitles)
-        script_path = os.path.join(current_directory, "process", "audio.py")
 
-        subprocess.run(
-            ["python", script_path, paragraph],
-            check=True,
-        )
-        return JSONResponse(content={"subtitles": subtitles})
+        # response = requests.post("http://localhost:8000/text-to-speech", json={"text":paragraph})
+        return paragraph
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -65,3 +63,36 @@ async def get_file(file_name: str):
         raise HTTPException(status_code=404, detail="File not found")
 
     return FileResponse(file_path, filename=file_name)
+
+
+class TextToSpeechRequest(BaseModel):
+    text: str
+    output_filename: str = "output.mp3"  # Optional, default name for audio file
+
+
+@app.post("/text-to-speech")
+async def tts(request: Request, text_to_speech_request: TextToSpeechRequest):
+    """Converts text to speech and saves the audio file on the server."""
+
+    try:
+        engine = init()
+        engine.setProperty("rate", 150)  # Adjust speed as needed
+        engine.setProperty("volume", 1)  # Adjust volume as needed
+
+        # Choose a directory for saving the audio file (modify as needed)
+        output_path = "process"  # Example path
+
+        engine.save_to_file(
+            text_to_speech_request.text,
+            os.path.join(output_path, text_to_speech_request.output_filename),
+        )
+        engine.runAndWait()
+
+        return FileResponse(
+            path=os.path.join(output_path, text_to_speech_request.output_filename),
+            media_type="audio/mpeg",
+            filename=text_to_speech_request.output_filename,
+        )
+
+    except Exception as e:
+        return {"error": str(e)}

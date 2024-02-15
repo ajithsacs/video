@@ -27,7 +27,7 @@ def get_youtube_thumbnails(url, num_frames):
             if ret:
                 save_as = f"thumbnail_{i + 1}.jpg"
                 cv2.imwrite(save_as, frame)
-                # print(f"Thumbnail {i + 1} saved as {save_as}")
+                print(f"Thumbnail {i + 1} saved as {save_as}")
             else:
                 print(f"Failed to capture frame {i + 1}, check the video URL")
 
@@ -41,6 +41,5 @@ def get_youtube_thumbnails(url, num_frames):
 
 if __name__ == "__main__":
     video_url = sys.argv[1]
-    print("vido", video_url)
     num_frames = 30
     get_youtube_thumbnails(video_url, num_frames)
